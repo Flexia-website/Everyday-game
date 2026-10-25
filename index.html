@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#08090c">
+<meta name="description" content="Everyday in PH — an open-world 3D Port Harcourt. Walk the streets, drive the cars, live the everyday. In development. Join the waitlist.">
+<title>Everyday in PH — Port Harcourt, in 3D</title>
+<link rel="icon" type="image/svg+xml" href="assets/logo-icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#08090c;
+  --surface:#101216;
+  --border:#1e2228;
+  --border-2:#2a2f36;
+  --text:#e8eaed;
+  --text-dim:#9ca1ab;
+  --text-muted:#6a6f7a;
+  --accent:#ff9c1a;
+  --purple:#a78bfa;
+  --cyan:#5ee0ff;
+  --max:1100px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+  font-size:15px;line-height:1.6;font-feature-settings:"ss01","cv01";
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+}
+a{color:inherit;text-decoration:none}
+img,svg,canvas{display:block;max-width:100%}
+button,input{font:inherit;color:inherit}
+::selection{background:var(--accent);color:var(--bg)}
+
+.wrap{width:100%;max-width:var(--max);margin:0 auto;padding:0 28px}
+
+#loader{position:fixed;inset:0;z-index:1000;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;transition:opacity .7s ease,visibility .7s ease}
+#loader.gone{opacity:0;visibility:hidden;pointer-events:none}
+#loader .spinner{width:42px;height:42px;border-radius:50%;border:2px solid rgba(255,156,26,.12);border-top-color:var(--accent);animation:spin .9s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#loader .label{font-size:10px;letter-spacing:.3em;font-weight:700;color:var(--text-muted);text-transform:uppercase}
+
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:20px 28px;display:flex;align-items:center;justify-content:space-between;transition:background .3s,border-color .3s,padding .3s;border-bottom:1px solid transparent}
+.nav.scrolled{background:rgba(8,9,12,.85);border-bottom-color:var(--border);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);padding:14px 28px}
+.nav-brand{display:flex;align-items:center;gap:10px;font-size:11px;letter-spacing:.24em;font-weight:800}
+.nav-brand img{width:26px;height:26px;border-radius:7px}
+.nav-links{display:flex;align-items:center;gap:26px}
+.nav-links a{font-size:12px;font-weight:500;color:var(--text-dim);transition:color .15s}
+.nav-links a:hover{color:var(--text)}
+.nav-cta{padding:9px 18px;border-radius:6px;background:var(--text);color:var(--bg)!important;font-weight:700;transition:transform .15s,background .15s}
+.nav-cta:hover{background:var(--accent);transform:translateY(-1px)}
+@media (max-width:640px){.nav{padding:14px 20px}.nav.scrolled{padding:10px 20px}.nav-links{gap:16px}.nav-links a:first-child{display:none}}
+
+.stage-section{position:relative;min-height:100vh;min-height:100svh;display:flex;align-items:center;overflow:hidden;background:#0a0e16}
+.stage-canvas{position:absolute;inset:0;z-index:0}
+.stage-canvas canvas{width:100%;height:100%;display:block;touch-action:pan-y}
+.stage-content{position:relative;z-index:2;width:100%;max-width:var(--max);margin:0 auto;padding:100px 28px 80px}
+
+.overlay-left{position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,rgba(8,9,12,.92) 0%,rgba(8,9,12,.7) 32%,rgba(8,9,12,.15) 68%,rgba(8,9,12,0) 100%)}
+.overlay-bottom{position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(180deg,rgba(8,9,12,.35) 0%,rgba(8,9,12,.1) 30%,rgba(8,9,12,.55) 75%,rgba(8,9,12,.94) 100%)}
+@media (max-width:900px){
+  .overlay-left{background:linear-gradient(180deg,rgba(8,9,12,.4) 0%,rgba(8,9,12,.2) 35%,rgba(8,9,12,.9) 100%)}
+}
+
+.kicker{display:inline-flex;align-items:center;gap:8px;font-size:10px;letter-spacing:.28em;font-weight:800;color:var(--accent);text-transform:uppercase;margin-bottom:26px}
+.kicker::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent);animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.section-kicker{font-size:10px;letter-spacing:.28em;font-weight:800;color:var(--accent);text-transform:uppercase;margin-bottom:20px}
+.section-title{font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:clamp(36px,5.2vw,62px);line-height:1.05;letter-spacing:-.025em;margin-bottom:24px}
+.section-title em{font-style:italic;color:var(--accent)}
+.section-lede{font-size:17px;line-height:1.7;color:var(--text-dim);max-width:560px}
+@media (max-width:640px){.section-lede{font-size:15px}}
+
+#sec-hero .stage-content{max-width:620px;padding-top:120px;padding-bottom:80px}
+#sec-hero h1{font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:clamp(44px,7vw,84px);line-height:1.02;letter-spacing:-.03em;margin-bottom:24px}
+#sec-hero h1 em{font-style:italic;color:var(--accent)}
+#sec-hero .lede{font-size:17px;line-height:1.65;color:var(--text-dim);max-width:480px;margin-bottom:34px}
+@media (max-width:640px){#sec-hero .lede{font-size:15px}}
+
+.hero-stats{display:flex;gap:32px;padding-top:24px;border-top:1px solid var(--border);font-size:12px}
+.hero-stats > div{display:flex;flex-direction:column;gap:2px}
+.hero-stats .label{color:var(--text-muted);letter-spacing:.18em;text-transform:uppercase;font-size:10px;font-weight:700}
+.hero-stats .value{color:var(--text);font-weight:600;font-size:14px}
+@media (max-width:480px){.hero-stats{gap:20px}}
+
+.waitlist-form{display:flex;gap:8px;max-width:440px;margin-bottom:14px}
+.waitlist-form input{flex:1;min-width:0;padding:14px 16px;border-radius:8px;border:1px solid var(--border-2);background:rgba(255,255,255,.04);font-size:14px;outline:none;transition:border-color .15s,background .15s}
+.waitlist-form input::placeholder{color:var(--text-muted)}
+.waitlist-form input:focus{border-color:var(--accent);background:rgba(255,255,255,.06)}
+.waitlist-form button{padding:14px 22px;border:none;border-radius:8px;background:var(--text);color:var(--bg);font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap;transition:transform .12s,background .15s}
+.waitlist-form button:hover{background:var(--accent);transform:translateY(-1px)}
+.waitlist-form button:active{transform:translateY(0)}
+.waitlist-form button:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.form-meta{font-size:12px;color:var(--text-muted);margin-bottom:32px}
+.form-meta.success{color:#4ade80}
+.form-meta.error{color:#ff6b6b}
+.form-meta a{color:var(--accent);text-decoration:underline}
+@media (max-width:480px){.waitlist-form{flex-direction:column}.waitlist-form button{width:100%}}
+
+.landmarks{list-style:none;border-top:1px solid var(--border);max-width:520px;margin-top:12px}
+.landmarks li{display:flex;justify-content:space-between;align-items:baseline;padding:14px 0;border-bottom:1px solid var(--border);font-size:14px}
+.landmarks li .name{font-weight:500}
+.landmarks li .sub{font-size:11px;color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase}
+
+#sec-cars .stage-content{align-self:flex-end;padding-bottom:48px}
+.cars-panel{margin-top:32px;max-width:720px}
+.car-selector{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+@media (max-width:640px){.car-selector{grid-template-columns:repeat(2,1fr)}}
+.car-selector button{padding:12px 14px;border-radius:10px;border:1px solid var(--border-2);background:rgba(255,255,255,.03);color:var(--text-dim);font-size:12px;font-weight:600;cursor:pointer;text-align:left;transition:all .15s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.car-selector button:hover{color:var(--text);background:rgba(255,255,255,.06)}
+.car-selector button.active{border-color:var(--accent);background:rgba(255,156,26,.14);color:var(--text)}
+.car-selector button .sel-name{font-weight:700;display:block;margin-bottom:3px;font-size:13px}
+.car-selector button .sel-sub{font-size:10px;color:var(--text-muted);letter-spacing:.12em;text-transform:uppercase;font-weight:600}
+.car-swatches{display:flex;align-items:center;gap:10px;padding-top:14px;border-top:1px solid var(--border-2);flex-wrap:wrap}
+.car-swatches .lbl{font-size:10px;letter-spacing:.2em;color:var(--text-muted);text-transform:uppercase;font-weight:700;margin-right:6px}
+.car-swatches button{width:26px;height:26px;border-radius:50%;border:2px solid var(--border-2);cursor:pointer;transition:transform .12s,border-color .15s;padding:0}
+.car-swatches button:hover{transform:scale(1.1)}
+.car-swatches button.active{border-color:var(--text);box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--text)}
+
+#sec-char .stage-content{max-width:560px}
+.emote-bar{display:flex;gap:8px;flex-wrap:wrap;margin-top:36px;padding-top:28px;border-top:1px solid var(--border-2)}
+.emote-bar .emote-lbl{font-size:10px;letter-spacing:.24em;color:var(--text-muted);text-transform:uppercase;font-weight:800;align-self:center;margin-right:8px;width:100%;margin-bottom:6px}
+.emote-btn{padding:11px 18px;border-radius:10px;border:1px solid var(--border-2);background:rgba(255,255,255,.03);color:var(--text-dim);font-size:11px;font-weight:800;letter-spacing:.16em;cursor:pointer;transition:all .18s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);font-family:inherit}
+.emote-btn:hover{color:var(--text);background:rgba(255,255,255,.07);border-color:var(--border-2)}
+.emote-btn.active{border-color:var(--purple);background:rgba(167,139,250,.16);color:#c4b5fd;box-shadow:0 0 18px rgba(167,139,250,.32)}
+.emote-btn .emote-ico{display:inline-block;margin-right:6px;font-size:14px}
+
+#sec-credits{background:#06080a;min-height:100vh}
+#sec-credits .stage-content{text-align:left;max-width:900px}
+.credits-name{font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:clamp(64px,11vw,150px);line-height:.95;letter-spacing:-.035em;margin-bottom:32px;color:var(--text)}
+.credits-name em{font-style:italic;color:var(--accent)}
+.credits-blurb{font-size:17px;color:var(--text-dim);max-width:520px;margin-bottom:32px;line-height:1.7}
+.credits-link{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--accent);letter-spacing:.02em;border-bottom:1px solid rgba(255,156,26,.35);padding-bottom:2px;transition:border-color .15s}
+.credits-link:hover{border-color:var(--accent)}
+@media (max-width:640px){.credits-blurb{font-size:15px}}
+
+#sec-waitlist{padding:140px 0;text-align:center;background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+#sec-waitlist .wrap{max-width:640px}
+#sec-waitlist .section-kicker{text-align:center;display:block}
+#sec-waitlist .section-title{text-align:center}
+#sec-waitlist .section-lede{margin:0 auto 40px;text-align:center;max-width:520px}
+#sec-waitlist .waitlist-form{margin:0 auto 14px;max-width:480px}
+#sec-waitlist .form-meta{text-align:center;margin-bottom:0}
+@media (max-width:640px){#sec-waitlist{padding:90px 0}}
+
+.social-links{display:flex;justify-content:center;gap:24px;margin-top:48px;padding-top:40px;border-top:1px solid var(--border);flex-wrap:wrap}
+.social-links a{font-size:12px;color:var(--text-dim);font-weight:500;display:inline-flex;align-items:center;gap:8px;transition:color .15s}
+.social-links a:hover{color:var(--accent)}
+.social-links a::before{content:'→';font-size:10px;opacity:.6}
+
+footer{border-top:1px solid var(--border);padding:60px 0 40px;background:var(--bg)}
+.footer-top{display:grid;grid-template-columns:2fr 1fr 1fr;gap:48px;margin-bottom:48px}
+@media (max-width:760px){.footer-top{grid-template-columns:1fr;gap:32px}}
+.footer-brand .brand{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.footer-brand .brand img{width:30px;height:30px;border-radius:8px}
+.footer-brand .brand span{font-size:12px;font-weight:800;letter-spacing:.22em}
+.footer-brand p{font-size:13px;color:var(--text-dim);max-width:340px;line-height:1.65}
+.footer-col h4{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--text-muted);font-weight:800;margin-bottom:16px}
+.footer-col ul{list-style:none;display:flex;flex-direction:column;gap:10px}
+.footer-col a{font-size:13px;color:var(--text-dim);transition:color .15s}
+.footer-col a:hover{color:var(--text)}
+.footer-bottom{display:flex;justify-content:space-between;align-items:center;padding-top:32px;border-top:1px solid var(--border);font-size:12px;color:var(--text-muted);gap:20px;flex-wrap:wrap}
+.footer-bottom a{color:var(--text-dim)}
+.footer-bottom a:hover{color:var(--accent)}
+
+.scroll-hint{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);z-index:3;font-size:10px;letter-spacing:.32em;font-weight:800;color:rgba(234,246,255,.5);text-transform:uppercase;pointer-events:none;animation:bob 2.4s ease-in-out infinite;transition:opacity .4s}
+@keyframes bob{0%,100%{transform:translate(-50%,0);opacity:.4}50%{transform:translate(-50%,8px);opacity:1}}
+
+.reveal{opacity:0;transform:translateY(16px);transition:opacity .8s cubic-bezier(.2,.9,.3,1),transform .8s cubic-bezier(.2,.9,.3,1)}
+.reveal.on{opacity:1;transform:none}
+
+.no-webgl .stage-canvas{display:none}
+.no-webgl #sec-hero{background:radial-gradient(ellipse at 70% 60%,#1a2846 0%,#0a0e16 55%,#06080a 100%)}
+.no-webgl #sec-city{background:radial-gradient(ellipse at 50% 60%,#1a2434 0%,#080d15 60%,#06080a 100%)}
+.no-webgl #sec-cars{background:radial-gradient(ellipse at 60% 50%,#241a10 0%,#0a0e16 60%,#06080a 100%)}
+.no-webgl #sec-char{background:radial-gradient(ellipse at 60% 40%,#241028 0%,#080d15 60%,#06080a 100%)}
+</style>
+</head>
+<body>
+
+<div id="loader">
+  <div class="spinner"></div>
+  <div class="label">Building Port Harcourt</div>
+</div>
+
+<nav class="nav" id="nav">
+  <a class="nav-brand" href="/">
+    <img src="assets/logo-icon.svg" alt="">
+    <span>EVERYDAY IN PH</span>
+  </a>
+  <div class="nav-links">
+    <a href="https://clintonbenjamin.dedyn.io" target="_blank" rel="noopener">Dev log</a>
+    <a href="#waitlist" class="nav-cta">Join waitlist</a>
+  </div>
+</nav>
+
+<main>
+
+  <section class="stage-section" id="sec-hero">
+    <div class="stage-canvas"><canvas id="canvas-hero"></canvas></div>
+    <div class="overlay-left"></div>
+    <div class="stage-content">
+      <span class="kicker">In development · Port Harcourt, NG</span>
+      <h1>Port Harcourt,<br><em>rebuilt in polygons.</em></h1>
+      <p class="lede">An open world of the Garden City. Drive the streets you know, walk into any building, talk to the people. In development now — join the waitlist to get in first.</p>
+      <form class="waitlist-form" id="hero-form" novalidate>
+        <label for="hero-email" style="position:absolute;left:-9999px">Email address</label>
+        <input type="email" id="hero-email" placeholder="your@email.com" autocomplete="email" required>
+        <button type="submit">Join waitlist</button>
+      </form>
+      <p class="form-meta" id="hero-meta">No spam. Only updates when the game is ready.</p>
+      <div class="hero-stats">
+        <div><span class="label">Platform</span><span class="value">Android first</span></div>
+        <div><span class="label">Release</span><span class="value">2026</span></div>
+        <div><span class="label">Price</span><span class="value">Free to play</span></div>
+      </div>
+    </div>
+    <div class="scroll-hint" id="scroll-hint">Scroll to explore ↓</div>
+  </section>
+
+  <section class="stage-section" id="sec-city">
+    <div class="stage-canvas"><canvas id="canvas-city"></canvas></div>
+    <div class="overlay-left"></div>
+    <div class="stage-content" style="max-width:560px">
+      <p class="section-kicker reveal">The city</p>
+      <h2 class="section-title reveal">Every street<br><em>you know.</em></h2>
+      <p class="section-lede reveal" style="margin-bottom:36px">
+        Every landmark in the game is a real place in Port Harcourt. The Government
+        House sits at the top of the map, the Mile 1 Market buzzes at the south, and
+        the Garden City's tree-lined streets connect them all.
+      </p>
+      <ul class="landmarks reveal">
+        <li><span class="name">Government House</span><span class="sub">State Secretariat</span></li>
+        <li><span class="name">Isaac Boro Park</span><span class="sub">Memorial Grounds</span></li>
+        <li><span class="name">Mile 1 Market</span><span class="sub">Trading District</span></li>
+        <li><span class="name">Omagwa Airport</span><span class="sub">International</span></li>
+        <li><span class="name">Hotel Presidential</span><span class="sub">Woji Road</span></li>
+        <li><span class="name">University of Port Harcourt</span><span class="sub">Uniport Campus</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="stage-section" id="sec-cars">
+    <div class="stage-canvas"><canvas id="canvas-cars"></canvas></div>
+    <div class="overlay-bottom"></div>
+    <div class="stage-content">
+      <p class="section-kicker reveal">The garage</p>
+      <h2 class="section-title reveal">From the Scrappy<br><em>to the Chiron.</em></h2>
+      <div class="cars-panel reveal">
+        <div class="car-selector" id="car-selector"></div>
+        <div class="car-swatches" id="car-swatches">
+          <span class="lbl">Paint</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="stage-section" id="sec-char">
+    <div class="stage-canvas"><canvas id="canvas-char"></canvas></div>
+    <div class="overlay-left"></div>
+    <div class="stage-content">
+      <p class="section-kicker reveal">Your character</p>
+      <h2 class="section-title reveal">Purple hoodie.<br><em>Tank top. Anything.</em></h2>
+      <p class="section-lede reveal">
+        Dress your character however you like — hoodies, tank tops, jeans, sneakers.
+        Then make them move. Walk, run, dance, moonwalk.
+      </p>
+      <div class="emote-bar reveal" id="emote-bar">
+        <div class="emote-lbl">Emote</div>
+        <button class="emote-btn active" data-emote="idle"><span class="emote-ico">🧍</span>IDLE</button>
+        <button class="emote-btn" data-emote="walk"><span class="emote-ico">🚶</span>WALK</button>
+        <button class="emote-btn" data-emote="run"><span class="emote-ico">🏃</span>RUN</button>
+        <button class="emote-btn" data-emote="dance"><span class="emote-ico">🕺</span>DANCE</button>
+        <button class="emote-btn" data-emote="moonwalk"><span class="emote-ico">🌙</span>MOONWALK</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="stage-section" id="sec-credits">
+    <div class="stage-content">
+      <p class="section-kicker reveal">Built by</p>
+      <h2 class="credits-name reveal">Clinton<br><em>Benjamin</em></h2>
+      <p class="credits-blurb reveal">
+        One developer. One city. Port Harcourt. If you want to follow the build —
+        the bugs, the late nights, the small wins — the dev log lives here.
+      </p>
+      <a href="https://clintonbenjamin.dedyn.io" class="credits-link reveal" target="_blank" rel="noopener">
+        clintonbenjamin.dedyn.io
+      </a>
+    </div>
+  </section>
+
+  <section id="sec-waitlist">
+    <div class="wrap">
+      <p class="section-kicker reveal">The waitlist</p>
+      <h2 class="section-title reveal">Be first<br><em>in line.</em></h2>
+      <p class="section-lede reveal">Waitlist members get early access, dev updates, and a say in what gets built next. No noise, no spam — only the good stuff.</p>
+      <form class="waitlist-form reveal" id="main-form" novalidate>
+        <label for="main-email" style="position:absolute;left:-9999px">Email address</label>
+        <input type="email" id="main-email" placeholder="your@email.com" autocomplete="email" required>
+        <button type="submit">Join waitlist</button>
+      </form>
+      <p class="form-meta reveal" id="main-meta">Already on the list? You're all set.</p>
+      <div class="social-links reveal">
+        <a href="https://clintonbenjamin.dedyn.io" target="_blank" rel="noopener">Dev log</a>
+        <a href="mailto:clintonbenjamin208@gmail.com">Contact the developer</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="brand">
+          <img src="assets/logo-icon.svg" alt="">
+          <span>EVERYDAY IN PH</span>
+        </div>
+        <p>A 3D Port Harcourt, in your pocket. Built from scratch by Clinton Benjamin, in the Garden City.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Project</h4>
+        <ul>
+          <li><a href="https://clintonbenjamin.dedyn.io" target="_blank" rel="noopener">Dev log</a></li>
+          <li><a href="#waitlist">Waitlist</a></li>
+          <li><a href="mailto:clintonbenjamin208@gmail.com">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Made in</h4>
+        <ul>
+          <li><a href="https://clintonbenjamin.dedyn.io" target="_blank" rel="noopener">Port Harcourt, NG</a></li>
+          <li><span style="font-size:13px;color:var(--text-dim)">Rivers State</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Everyday in PH. All rights reserved.</span>
+      <span>Built by <a href="https://clintonbenjamin.dedyn.io" target="_blank" rel="noopener">Clinton Benjamin</a></span>
+    </div>
+  </div>
+</footer>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.169.0/build/three.module.js"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { buildChiron3D }     from './js/vehicles/chiron3d.js';
+import { buildGWagon3D }     from './js/vehicles/gwagon3d.js';
+import { buildCybertruck3D } from './js/vehicles/cybertruck3d.js';
+import { buildScrappy3D }    from './js/vehicles/scrappy3d.js';
+
+const $ = (id) => document.getElementById(id);
+
+function disposeGroup(group) {
+  if (!group) return;
+  group.traverse(o => {
+    if (o.geometry) o.geometry.dispose();
+    if (o.material) {
+      const ms = Array.isArray(o.material) ? o.material : [o.material];
+      ms.forEach(m => { if (!m) return; if (m.map) m.map.dispose(); m.dispose(); });
+    }
+  });
+}
+
+/* NAV scroll */
+const nav = $('nav');
+addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 20);
+}, { passive: true });
+
+/* Reveal */
+if ('IntersectionObserver' in window) {
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('on'); obs.unobserve(e.target); }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+} else {
+  document.querySelectorAll('.reveal').forEach(el => el.classList.add('on'));
+}
+
+addEventListener('scroll', () => {
+  const hint = $('scroll-hint');
+  if (hint) hint.style.opacity = window.scrollY > 40 ? '0' : '1';
+}, { passive: true });
+
+function hasWebGL() {
+  try {
+    const c = document.createElement('canvas');
+    return !!(c.getContext('webgl') || c.getContext('experimental-webgl'));
+  } catch (e) { return false; }
+}
+
+/* ─── City builder ─── */
+function makeWindowTexture(seed) {
+  const c = document.createElement('canvas');
+  c.width = c.height = 64;
+  const g = c.getContext('2d');
+  g.fillStyle = '#000'; g.fillRect(0, 0, 64, 64);
+  let s = seed * 9301 + 49297;
+  const rnd = () => { s = (s * 9301 + 49297) % 233280; return s / 233280; };
+  const cols = 6, rows = 8;
+  const cw = 64 / cols, ch = 64 / rows;
+  for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) {
+    if (rnd() < 0.5) {
+      const w = rnd();
+      g.fillStyle = w < 0.5 ? '#ffffff' : w < 0.8 ? '#ffdd88' : '#ffaa44';
+      g.fillRect(x * cw + 1.5, y * ch + 2.5, cw - 3, ch - 5);
+    }
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+
+function buildCityScene(seedOffset = 0) {
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0a0e16);
+  scene.fog = new THREE.Fog(0x0a0e16, 90, 260);
+
+  scene.add(new THREE.HemisphereLight(0xff9c4a, 0x0a1020, 0.7));
+  scene.add(new THREE.AmbientLight(0x1e2a4a, 0.55));
+  const sun = new THREE.DirectionalLight(0xffb070, 2.6);
+  sun.position.set(-120, 40, -100); scene.add(sun);
+  const rim = new THREE.DirectionalLight(0x5ee0ff, 0.5);
+  rim.position.set(100, 60, 100); scene.add(rim);
+
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(600, 600),
+    new THREE.MeshLambertMaterial({ color: 0x0c1118 }));
+  ground.rotation.x = -Math.PI / 2; ground.position.y = -0.06;
+  scene.add(ground);
+
+  const BLOCK = 26, ROAD = 8, R = 5;
+  const roadMat = new THREE.MeshBasicMaterial({ color: 0x090c11 });
+  const totalSpan = (R * 2 + 2) * (BLOCK + ROAD);
+  for (let i = -R; i <= R + 1; i++) {
+    const line = i * (BLOCK + ROAD) - ROAD / 2;
+    const h = new THREE.Mesh(new THREE.PlaneGeometry(totalSpan, ROAD), roadMat);
+    h.rotation.x = -Math.PI / 2; h.position.set(0, 0.01, line); scene.add(h);
+    const v = new THREE.Mesh(new THREE.PlaneGeometry(ROAD, totalSpan), roadMat);
+    v.rotation.x = -Math.PI / 2; v.position.set(line, 0.01, 0); scene.add(v);
+  }
+
+  const palette = [
+    { color: 0x1a2434, glow: 0xff9c5a },
+    { color: 0x263244, glow: 0xffb070 },
+    { color: 0x2f3a4e, glow: 0xffd080 },
+    { color: 0x121a26, glow: 0xff8a4a },
+  ];
+  const windowTex = palette.map((_, i) => makeWindowTexture(i + 1 + seedOffset));
+  const materials = palette.map((p, i) => new THREE.MeshLambertMaterial({
+    color: p.color, emissive: p.glow, emissiveIntensity: 1.0, emissiveMap: windowTex[i],
+  }));
+  const geo = new THREE.BoxGeometry(1, 1, 1);
+
+  const cityGroup = new THREE.Group();
+  scene.add(cityGroup);
+
+  for (let x = -R; x <= R; x++) for (let z = -R; z <= R; z++) {
+    if (x === 0 && z === 0) continue;
+    const hash = Math.abs(Math.sin((x + seedOffset) * 12.9898 + z * 78.233) * 43758.5453) % 1;
+    if (hash < 0.14) continue;
+
+    const bx = x * (BLOCK + ROAD), bz = z * (BLOCK + ROAD);
+    const dist = Math.max(Math.abs(x), Math.abs(z));
+    const towerBias = Math.max(0.18, 1 - dist / 6);
+    const isTower = hash > (1 - towerBias * 0.62);
+    const h = isTower ? 44 + hash * 88 : 12 + hash * 22;
+    const w = 13 + (hash * 8), d = 13 + ((1 - hash) * 8);
+
+    const idx = Math.floor(hash * palette.length);
+    const mesh = new THREE.Mesh(geo, materials[idx]);
+    mesh.scale.set(w, h, d);
+    mesh.position.set(bx + (hash - 0.5) * 4, h / 2, bz + ((hash * 2 % 1) - 0.5) * 4);
+    mesh.rotation.y = (hash > 0.5 ? 0 : Math.PI / 2) + (hash - 0.5) * 0.2;
+    cityGroup.add(mesh);
+  }
+
+  const dotGeo = new THREE.SphereGeometry(0.22, 6, 5);
+  const dotMat = new THREE.MeshBasicMaterial({ color: 0xffbb66 });
+  const dotCount = 90;
+  const dotMesh = new THREE.InstancedMesh(dotGeo, dotMat, dotCount);
+  const dotM = new THREE.Matrix4();
+  for (let i = 0; i < dotCount; i++) {
+    const a = (i / dotCount) * Math.PI * 2;
+    const r = 20 + (i * 17 % 90);
+    dotM.makeTranslation(Math.cos(a) * r + (i % 5) * 6, 1.0, Math.sin(a) * r + (i % 7) * 6);
+    dotMesh.setMatrixAt(i, dotM);
+  }
+  cityGroup.add(dotMesh);
+
+  return { scene, cityGroup };
+}
+
+function initHeroCity() {
+  const canvas = $('canvas-hero');
+  if (!canvas) return null;
+  const { scene, cityGroup } = buildCityScene(0);
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: 'high-performance' });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+  renderer.setClearColor(0x0a0e16, 1);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  const camera = new THREE.PerspectiveCamera(32, 1, 0.5, 800);
+  camera.position.set(72, 48, 78);
+  camera.lookAt(0, 18, 0);
+  const ro = new ResizeObserver(() => {
+    const w = canvas.clientWidth || window.innerWidth;
+    const h = canvas.clientHeight || window.innerHeight;
+    if (!w || !h) return;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h; camera.updateProjectionMatrix();
+  });
+  ro.observe(canvas);
+  return {
+    renderer, scene, camera,
+    update(dt, t) {
+      cityGroup.rotation.y += dt * 0.028;
+      const scrollDelta = (window.scrollY - (this._lastScroll || 0)) * 0.0009;
+      cityGroup.rotation.y += scrollDelta;
+      this._lastScroll = window.scrollY;
+      camera.position.x = 72 + Math.sin(t * 0.06) * 7;
+      camera.position.z = 78 + Math.cos(t * 0.06) * 7;
+      camera.position.y = 48 + Math.sin(t * 0.09) * 2.5;
+      camera.lookAt(0, 18, 0);
+    },
+  };
+}
+
+function initCitySection() {
+  const canvas = $('canvas-city');
+  if (!canvas) return null;
+  const { scene, cityGroup } = buildCityScene(7);
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: 'high-performance' });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+  renderer.setClearColor(0x0a0e16, 1);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  const camera = new THREE.PerspectiveCamera(38, 1, 0.5, 800);
+  camera.position.set(48, 28, 58);
+  camera.lookAt(0, 14, 0);
+  const ro = new ResizeObserver(() => {
+    const w = canvas.clientWidth || window.innerWidth;
+    const h = canvas.clientHeight || window.innerHeight;
+    if (!w || !h) return;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h; camera.updateProjectionMatrix();
+  });
+  ro.observe(canvas);
+  return {
+    renderer, scene, camera,
+    update(dt, t) {
+      cityGroup.rotation.y += dt * 0.018;
+      const rect = canvas.getBoundingClientRect();
+      cityGroup.rotation.y += (-rect.top / Math.max(1, rect.height)) * 0.02;
+      camera.position.x = 48 + Math.sin(t * 0.05) * 4;
+      camera.position.z = 58 + Math.cos(t * 0.05) * 4;
+      camera.position.y = 28 + Math.sin(t * 0.07) * 1.5;
+      camera.lookAt(0, 14, 0);
+    },
+  };
+}
+
+/* ─── Cars ─── */
+const CAR_DEFS = {
+  chiron:     { build: (c) => buildChiron3D(c || '#0e2138', '#c9ced6'),
+                colors: ['#0e2138', '#7a1414', '#f2f4f7', '#0a0a0a', '#1a4a2a', '#8a6a2a'],
+                name: 'Bugatti Chiron', tag: 'W16 · 1500 PS' },
+  gwagon:     { build: (c) => buildGWagon3D(c || '#24282e', '#9aa3ad'),
+                colors: ['#24282e', '#f2f4f7', '#1a4a2a', '#4a1a1a', '#8a6a2a', '#4d6b74'],
+                name: 'Mercedes G-Wagon', tag: 'AMG · V8' },
+  cybertruck: { build: (c) => buildCybertruck3D(c || '#c4c9d2', '#9aa0a8'),
+                colors: ['#c4c9d2', '#4a4a4a', '#1a1a1a', '#d4a017', '#8a4a2a'],
+                name: 'Tesla Cybertruck', tag: 'Tri-Motor' },
+  scrappy:    { build: (c) => buildScrappy3D(c || '#4d6b74', '#8d9298'),
+                colors: ['#4d6b74', '#7d3a2e', '#6e6f68', '#8a6a2a', '#3a3a40'],
+                name: 'The Scrappy', tag: 'Starter · Rusty' },
+};
+
+function initCarsCanvas() {
+  const canvas = $('canvas-cars');
+  const selector = $('car-selector');
+  const swatches = $('car-swatches');
+  if (!canvas || !selector) return null;
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: 'high-performance' });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+  renderer.setClearColor(0x0a0e16, 1);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0a0e16);
+  scene.fog = new THREE.Fog(0x0a0e16, 40, 120);
+
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x0c1118, 0.9));
+  scene.add(new THREE.AmbientLight(0x4a5a72, 0.7));
+  const keyLight = new THREE.DirectionalLight(0xffffff, 2.6);
+  keyLight.position.set(6, 9, 5); scene.add(keyLight);
+  const fillLight = new THREE.DirectionalLight(0x88aaff, 0.9);
+  fillLight.position.set(-6, 4, 6); scene.add(fillLight);
+  const rimLight = new THREE.DirectionalLight(0xff9c5a, 1.6);
+  rimLight.position.set(-4, 3, -8); scene.add(rimLight);
+
+  const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 100);
+
+  const floor = new THREE.Mesh(new THREE.CircleGeometry(8, 48),
+    new THREE.MeshBasicMaterial({ color: 0x10161e, transparent: true, opacity: 0.9 }));
+  floor.rotation.x = -Math.PI / 2; floor.position.y = -0.02; scene.add(floor);
+
+  const ring = new THREE.Mesh(new THREE.RingGeometry(2.2, 2.35, 64),
+    new THREE.MeshBasicMaterial({ color: 0xff9c1a, transparent: true, opacity: 0.55, side: THREE.DoubleSide, depthWrite: false }));
+  ring.rotation.x = -Math.PI / 2; ring.position.y = 0.005; scene.add(ring);
+
+  let currentCar = null, currentKey = null, currentColor = null, spin = 0;
+
+  function frameCamera(group) {
+    const box = new THREE.Box3().setFromObject(group);
+    const size = new THREE.Vector3(), center = new THREE.Vector3();
+    box.getSize(size); box.getCenter(center);
+    const maxDim = Math.max(size.x, size.y, size.z);
+    const dist = maxDim * 1.35;
+    const aspect = (canvas.clientWidth || 1) / (canvas.clientHeight || 1);
+    camera.aspect = aspect;
+    camera.fov = aspect < 1 ? 40 : 32;
+    camera.updateProjectionMatrix();
+    camera.position.set(center.x + dist * 0.72, center.y + maxDim * 0.30, center.z + dist * 0.85);
+    camera.lookAt(center.x, center.y * 0.95, center.z);
+    const ringR = maxDim * 0.72;
+    ring.geometry.dispose();
+    ring.geometry = new THREE.RingGeometry(ringR - 0.08, ringR, 64);
+    ring.position.set(center.x, 0.005, center.z);
+  }
+
+  function loadCar(key, color) {
+    if (currentCar) { scene.remove(currentCar); disposeGroup(currentCar); currentCar = null; }
+    const def = CAR_DEFS[key]; if (!def) return;
+    try { currentCar = def.build(color); }
+    catch (e) {
+      console.error('[car] build failed:', key, e);
+      currentCar = new THREE.Group();
+      const fallback = new THREE.Mesh(new THREE.BoxGeometry(4, 1.2, 1.8),
+        new THREE.MeshStandardMaterial({ color: 0x445566 }));
+      fallback.position.y = 0.6;
+      currentCar.add(fallback);
+    }
+    scene.add(currentCar);
+    currentKey = key; currentColor = color;
+    frameCamera(currentCar);
+    spin = 0;
+  }
+
+  function renderSelector() {
+    selector.innerHTML = '';
+    Object.entries(CAR_DEFS).forEach(([key, def]) => {
+      const btn = document.createElement('button');
+      btn.dataset.key = key;
+      btn.innerHTML = `<span class="sel-name">${def.name}</span><span class="sel-sub">${def.tag}</span>`;
+      if (key === currentKey) btn.classList.add('active');
+      btn.addEventListener('click', () => {
+        if (currentKey === key) return;
+        loadCar(key, CAR_DEFS[key].colors[0]);
+        renderSelector(); renderSwatches();
+      });
+      selector.appendChild(btn);
+    });
+  }
+
+  function renderSwatches() {
+    const def = CAR_DEFS[currentKey]; if (!def) return;
+    swatches.innerHTML = '<span class="lbl">Paint</span>';
+    def.colors.forEach(c => {
+      const b = document.createElement('button');
+      b.style.background = c;
+      if (c === currentColor) b.classList.add('active');
+      b.addEventListener('click', () => { loadCar(currentKey, c); renderSwatches(); });
+      swatches.appendChild(b);
+    });
+  }
+
+  loadCar('chiron', CAR_DEFS.chiron.colors[0]);
+  renderSelector(); renderSwatches();
+
+  const ro = new ResizeObserver(() => {
+    const w = canvas.clientWidth || 1, h = canvas.clientHeight || 1;
+    if (!w || !h) return;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.fov = w < h ? 42 : 32;
+    camera.updateProjectionMatrix();
+  });
+  ro.observe(canvas);
+
+  return {
+    renderer, scene, camera,
+    update(dt, t) {
+      spin += 0.0045;
+      if (currentCar) currentCar.rotation.y = spin;
+      ring.material.opacity = 0.45 + Math.sin(t * 1.4) * 0.15;
+    },
+  };
+}
+
+/* ─── Character + emotes ─── */
+const HIP_HEIGHT = 0.935;
+
+function computeTargetPose(emote, t) {
+  const p = {
+    hipsPosY: HIP_HEIGHT, hipsPosX: 0,
+    hips: [0, 0, 0], spine: [0, 0, 0], head: [0, 0, 0],
+    lHip: [0, 0, 0], lKnee: [0, 0, 0], lAnkle: [0, 0, 0],
+    rHip: [0, 0, 0], rKnee: [0, 0, 0], rAnkle: [0, 0, 0],
+    lSh: [0, 0, 0], lEl: [0, 0, 0],
+    rSh: [0, 0, 0], rEl: [0, 0, 0],
+  };
+
+  if (emote === 'walk') {
+    const phase = t * 5;
+    p.lHip[0] = Math.sin(phase) * 0.55;
+    p.rHip[0] = Math.sin(phase + Math.PI) * 0.55;
+    p.lKnee[0] = Math.max(0, Math.cos(phase)) * 0.75;
+    p.rKnee[0] = Math.max(0, Math.cos(phase + Math.PI)) * 0.75;
+    p.lAnkle[0] = -Math.sin(phase) * 0.15;
+    p.rAnkle[0] = -Math.sin(phase + Math.PI) * 0.15;
+    p.lSh[0] = Math.sin(phase + Math.PI) * 0.45;
+    p.rSh[0] = Math.sin(phase) * 0.45;
+    p.lSh[2] = -0.1; p.rSh[2] = 0.1;
+    p.lEl[0] = -0.3; p.rEl[0] = -0.3;
+    p.spine[0] = 0.06;
+    p.hipsPosY = HIP_HEIGHT + Math.abs(Math.sin(phase * 2)) * 0.02;
+  } else if (emote === 'run') {
+    const phase = t * 9;
+    p.lHip[0] = Math.sin(phase) * 0.9;
+    p.rHip[0] = Math.sin(phase + Math.PI) * 0.9;
+    p.lKnee[0] = Math.max(0, Math.cos(phase)) * 1.3;
+    p.rKnee[0] = Math.max(0, Math.cos(phase + Math.PI)) * 1.3;
+    p.lAnkle[0] = -Math.sin(phase) * 0.25;
+    p.rAnkle[0] = -Math.sin(phase + Math.PI) * 0.25;
+    p.lSh[0] = Math.sin(phase + Math.PI) * 0.9;
+    p.rSh[0] = Math.sin(phase) * 0.9;
+    p.lEl[0] = -1.2; p.rEl[0] = -1.2;
+    p.spine[0] = 0.28;
+    p.head[0] = -0.2;
+    p.hipsPosY = HIP_HEIGHT + Math.abs(Math.sin(phase * 2)) * 0.05;
+  } else if (emote === 'dance') {
+    const beat = t * 2.4;
+    const bounce = Math.abs(Math.sin(beat));
+    const sway = Math.sin(beat);
+    p.hipsPosY = HIP_HEIGHT - 0.05 * bounce;
+    p.hips[1] = -sway * 0.25;
+    p.hips[2] = sway * 0.06;
+    p.spine[1] = sway * 0.35;
+    p.spine[0] = 0.04 + 0.05 * bounce;
+    p.head[1] = -sway * 0.2;
+    p.head[2] = sway * 0.1;
+    const armL = Math.sin(beat);
+    const armR = -armL;
+    p.lSh[0] = -1.0 + armL * 0.8;
+    p.lSh[2] = 0.5 + armL * 0.25;
+    p.lEl[0] = -1.4 + armL * 0.5;
+    p.rSh[0] = -1.0 + armR * 0.8;
+    p.rSh[2] = -0.5 + armR * 0.25;
+    p.rEl[0] = -1.4 + armR * 0.5;
+    const liftL = Math.max(0, sway);
+    const liftR = Math.max(0, -sway);
+    p.lHip[0] = -liftL * 0.35;
+    p.lKnee[0] = liftL * 0.65;
+    p.rHip[0] = -liftR * 0.35;
+    p.rKnee[0] = liftR * 0.65;
+  } else if (emote === 'moonwalk') {
+    const phase = t * 4.5;
+    const sinP = Math.sin(phase);
+    const cosP = Math.cos(phase);
+    p.hipsPosX = sinP * 0.13;
+    const leftOnToe = sinP > 0;
+    if (leftOnToe) {
+      p.lAnkle[0] = 0.55; p.lKnee[0] = 0.35; p.lHip[0] = -0.08;
+      p.rHip[0] = -0.20; p.rKnee[0] = 0.65; p.rAnkle[0] = -0.35;
+    } else {
+      p.rAnkle[0] = 0.55; p.rKnee[0] = 0.35; p.rHip[0] = -0.08;
+      p.lHip[0] = -0.20; p.lKnee[0] = 0.65; p.lAnkle[0] = -0.35;
+    }
+    p.hipsPosY = HIP_HEIGHT - Math.abs(sinP) * 0.03;
+    p.hips[1] = cosP * 0.09;
+    p.spine[0] = 0.02;
+    p.spine[1] = -cosP * 0.15;
+    p.lSh[0] = -0.2; p.lSh[2] = 0.18; p.lEl[0] = -0.35;
+    p.rSh[0] = -0.6 + sinP * 0.45; p.rSh[2] = -0.4; p.rEl[0] = -1.3;
+    p.head[0] = 0.1;
+    p.head[1] = cosP * 0.1;
+  } else {
+    const b = Math.sin(t * 1.8) * 0.018;
+    p.spine[0] = b;
+    p.head[1] = Math.sin(t * 0.4) * 0.14;
+    p.lSh[2] = -0.15; p.rSh[2] = 0.15;
+    p.lEl[0] = -0.08; p.rEl[0] = -0.08;
+    p.hipsPosY = HIP_HEIGHT + Math.sin(t * 1.8) * 0.005;
+  }
+
+  return p;
+}
+
+function applyPose(rig, p, blend, baseX) {
+  if (!rig) return;
+  const L = (cur, target) => cur + (target - cur) * blend;
+  const L3 = (rot, target) => {
+    if (!rot) return;
+    rot.x = L(rig.hips.rotation.x, target[0]);
+    rot.y = L(rig.hips.rotation.y, target[1]);
+    rot.z = L(rig.hips.rotation.z, target[2]);
+  };
+  if (rig.hips) {
+    rig.hips.position.y = L(rig.hips.position.y, p.hipsPosY);
+    rig.hips.position.x = L(rig.hips.position.x, p.hipsPosX);
+    rig.hips.rotation.x = L(rig.hips.rotation.x, p.hips[0]);
+    rig.hips.rotation.y = L(rig.hips.rotation.y, p.hips[1]);
+    rig.hips.rotation.z = L(rig.hips.rotation.z, p.hips[2]);
+  }
+  if (rig.spine) {
+    rig.spine.rotation.x = L(rig.spine.rotation.x, p.spine[0]);
+    rig.spine.rotation.y = L(rig.spine.rotation.y, p.spine[1]);
+    rig.spine.rotation.z = L(rig.spine.rotation.z, p.spine[2]);
+  }
+  if (rig.head) {
+    rig.head.rotation.x = L(rig.head.rotation.x, p.head[0]);
+    rig.head.rotation.y = L(rig.head.rotation.y, p.head[1]);
+    rig.head.rotation.z = L(rig.head.rotation.z, p.head[2]);
+  }
+  if (rig.legL) {
+    if (rig.legL.hip) rig.legL.hip.rotation.x = L(rig.legL.hip.rotation.x, p.lHip[0]);
+    if (rig.legL.knee) rig.legL.knee.rotation.x = L(rig.legL.knee.rotation.x, p.lKnee[0]);
+    if (rig.legL.ankle) rig.legL.ankle.rotation.x = L(rig.legL.ankle.rotation.x, p.lAnkle[0]);
+  }
+  if (rig.legR) {
+    if (rig.legR.hip) rig.legR.hip.rotation.x = L(rig.legR.hip.rotation.x, p.rHip[0]);
+    if (rig.legR.knee) rig.legR.knee.rotation.x = L(rig.legR.knee.rotation.x, p.rKnee[0]);
+    if (rig.legR.ankle) rig.legR.ankle.rotation.x = L(rig.legR.ankle.rotation.x, p.rAnkle[0]);
+  }
+  if (rig.armL) {
+    if (rig.armL.shoulder) {
+      rig.armL.shoulder.rotation.x = L(rig.armL.shoulder.rotation.x, p.lSh[0]);
+      rig.armL.shoulder.rotation.y = L(rig.armL.shoulder.rotation.y, p.lSh[1]);
+      rig.armL.shoulder.rotation.z = L(rig.armL.shoulder.rotation.z, p.lSh[2]);
+    }
+    if (rig.armL.elbow) rig.armL.elbow.rotation.x = L(rig.armL.elbow.rotation.x, p.lEl[0]);
+  }
+  if (rig.armR) {
+    if (rig.armR.shoulder) {
+      rig.armR.shoulder.rotation.x = L(rig.armR.shoulder.rotation.x, p.rSh[0]);
+      rig.armR.shoulder.rotation.y = L(rig.armR.shoulder.rotation.y, p.rSh[1]);
+      rig.armR.shoulder.rotation.z = L(rig.armR.shoulder.rotation.z, p.rSh[2]);
+    }
+    if (rig.armR.elbow) rig.armR.elbow.rotation.x = L(rig.armR.elbow.rotation.x, p.rEl[0]);
+  }
+}
+
+async function initCharacterCanvas() {
+  const canvas = $('canvas-char');
+  const emoteBar = $('emote-bar');
+  if (!canvas) return null;
+
+  let buildCharacter;
+  try {
+    const mod = await import('./js/characters/lowpoly.js');
+    buildCharacter = mod.buildCharacter;
+  } catch (e) {
+    console.warn('[character] buildCharacter unavailable:', e);
+    return null;
+  }
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: 'high-performance' });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+  renderer.setClearColor(0x0a0e16, 1);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0a0e16);
+  scene.fog = new THREE.Fog(0x0a0e16, 12, 40);
+
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x1a1020, 1.0));
+  scene.add(new THREE.AmbientLight(0x6a5a72, 0.55));
+
+  const key = new THREE.DirectionalLight(0xffffff, 2.2);
+  key.position.set(3, 5, 4); scene.add(key);
+  const fill = new THREE.DirectionalLight(0x88aaff, 0.8);
+  fill.position.set(-4, 3, 3); scene.add(fill);
+  const rim = new THREE.DirectionalLight(0xa78bfa, 1.4);
+  rim.position.set(0, 3, -5); scene.add(rim);
+
+  const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 50);
+  camera.position.set(0, 1.0, 5.0);
+  camera.lookAt(0, 1.0, 0);
+
+  const pedestal = new THREE.Mesh(new THREE.CircleGeometry(2.4, 48),
+    new THREE.MeshBasicMaterial({ color: 0x0e1018, transparent: true, opacity: 0.9 }));
+  pedestal.rotation.x = -Math.PI / 2; pedestal.position.y = -0.01; scene.add(pedestal);
+
+  const ring1 = new THREE.Mesh(new THREE.RingGeometry(1.9, 2.0, 64),
+    new THREE.MeshBasicMaterial({ color: 0xa78bfa, transparent: true, opacity: 0.5, side: THREE.DoubleSide, depthWrite: false }));
+  ring1.rotation.x = -Math.PI / 2; ring1.position.y = 0.005; scene.add(ring1);
+
+  const ring2 = new THREE.Mesh(new THREE.RingGeometry(2.4, 2.46, 64),
+    new THREE.MeshBasicMaterial({ color: 0x5ee0ff, transparent: true, opacity: 0.25, side: THREE.DoubleSide, depthWrite: false }));
+  ring2.rotation.x = -Math.PI / 2; ring2.position.y = 0.008; scene.add(ring2);
+
+  const baseConfig = {
+    gender: 'masculine', skinTone: 4, hairStyle: 'short', hairColor: 1,
+    topPattern: 'solid', topAccent: 0,
+    bottomStyle: 'jeans', bottomColor: 2, bottomPattern: 'solid', bottomAccent: 0,
+    shoeStyle: 'sneakers', shoeColor: 1, hat: null, glasses: null,
+  };
+
+  let hoodieChar = null, tankChar = null;
+  let hoodieRig = null, tankRig = null;
+
+  try {
+    const built = buildCharacter({ ...baseConfig, topStyle: 'hoodie', topColor: 11 });
+    hoodieChar = built.root;
+    hoodieRig = built.rig;
+    hoodieChar._rig = hoodieRig; // Attach explicitly
+    hoodieChar.position.set(-0.85, 0, 0);
+    hoodieChar.rotation.y = 0.16;
+    scene.add(hoodieChar);
+  } catch (e) { console.warn('[char] hoodie:', e); }
+
+  try {
+    const built = buildCharacter({
+      ...baseConfig, hairStyle: 'buzz', hairColor: 0,
+      topStyle: 'tank', topColor: 5,
+      bottomStyle: 'tracksuit', bottomColor: 1,
+    });
+    tankChar = built.root;
+    tankRig = built.rig;
+    tankChar._rig = tankRig; // Attach explicitly
+    tankChar.position.set(0.85, 0, 0);
+    tankChar.rotation.y = -0.16;
+    scene.add(tankChar);
+  } catch (e) { console.warn('[char] tank:', e); }
+
+  let currentEmote = 'idle';
+
+  if (emoteBar) {
+    emoteBar.querySelectorAll('.emote-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const next = btn.dataset.emote;
+        if (next === currentEmote) return;
+        currentEmote = next;
+        emoteBar.querySelectorAll('.emote-btn').forEach(b => b.classList.toggle('active', b === btn));
+      });
+    });
+  }
+
+  const ro = new ResizeObserver(() => {
+    const w = canvas.clientWidth || 1, h = canvas.clientHeight || 1;
+    if (!w || !h) return;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.fov = w < h ? 45 : 35;
+    camera.updateProjectionMatrix();
+  });
+  ro.observe(canvas);
+
+  return {
+    renderer, scene, camera,
+    update(dt, t) {
+      const p = computeTargetPose(currentEmote, t);
+      const blend = 1 - Math.exp(-9 * dt);
+
+      if (hoodieRig) {
+        applyPose(hoodieRig, p, blend);
+      }
+      if (tankRig) {
+        applyPose(tankRig, p, blend);
+      }
+
+      ring1.material.opacity = 0.4 + Math.sin(t * 1.6) * 0.15;
+      ring2.material.opacity = 0.2 + Math.sin(t * 1.6 + 0.6) * 0.1;
+    },
+  };
+}
+
+/* ─── Render loop ─── */
+const stages = [];
+let _lastT = 0;
+
+function tick(now) {
+  requestAnimationFrame(tick);
+  const t = now * 0.001;
+  const dt = Math.min(0.05, _lastT ? (t - _lastT) : 0.016);
+  _lastT = t;
+  const vh = window.innerHeight;
+  for (const stage of stages) {
+    const rect = stage.section.getBoundingClientRect();
+    if (rect.bottom > -vh * 0.5 && rect.top < vh * 1.5) {
+      try { stage.update(dt, t); stage.renderer.render(stage.scene, stage.camera); }
+      catch (e) { console.warn('[render]', e); }
+    }
+  }
+}
+
+function initAllStages() {
+  if (!hasWebGL()) { document.body.classList.add('no-webgl'); return; }
+
+  try { const s = initHeroCity(); if (s) stages.push({ ...s, section: $('sec-hero') }); }
+  catch (e) { console.warn('[hero]', e); }
+
+  try { const s = initCitySection(); if (s) stages.push({ ...s, section: $('sec-city') }); }
+  catch (e) { console.warn('[city]', e); }
+
+  try { const s = initCarsCanvas(); if (s) stages.push({ ...s, section: $('sec-cars') }); }
+  catch (e) { console.warn('[cars]', e); }
+
+  initCharacterCanvas().then(s => {
+    if (s) stages.push({ ...s, section: $('sec-char') });
+  }).catch(e => console.warn('[char]', e));
+
+  requestAnimationFrame(tick);
+}
+
+/* ─── Waitlist — sends to Gmail via FormSubmit ─── */
+const WAITLIST_ENDPOINT = 'https://formsubmit.co/ajax/clintonbenjamin208@gmail.com';
+const WAITLIST_FALLBACK_EMAIL = 'clintonbenjamin208@gmail.com';
+const WAITLIST_KEY = 'ph_waitlist_emails_v1';
+
+function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+function getWaitlist() {
+  try { const r = localStorage.getItem(WAITLIST_KEY); return r ? JSON.parse(r) : []; } catch (e) { return []; }
+}
+function saveWaitlist(l) {
+  try { localStorage.setItem(WAITLIST_KEY, JSON.stringify(l)); } catch (e) {}
+}
+function showMeta(el, msg, cls) {
+  el.innerHTML = msg;
+  el.classList.remove('success', 'error');
+  if (cls) el.classList.add(cls);
+}
+
+function bindForm(formId, metaId) {
+  const form = $(formId), meta = $(metaId);
+  if (!form || !meta) return;
+  const input = form.querySelector('input[type="email"]');
+  const btn = form.querySelector('button');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = (input.value || '').trim().toLowerCase();
+    if (!isValidEmail(email)) {
+      showMeta(meta, 'Please enter a valid email address.', 'error');
+      input.focus();
+      return;
+    }
+    btn.disabled = true;
+    const orig = btn.textContent;
+    btn.textContent = 'Saving…';
+
+    let sentRemotely = false;
+    try {
+      const res = await fetch(WAITLIST_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({
+          email,
+          _subject: '🎮 New Everyday in PH waitlist signup',
+          _template: 'table',
+          _captcha: 'false',
+          source: 'everyday-in-ph-waitlist',
+        }),
+      });
+      if (res.ok) {
+        const j = await res.json().catch(() => ({}));
+        if (j.success === 'true' || j.success === true) sentRemotely = true;
+      }
+    } catch (err) {
+      console.warn('[waitlist] remote send failed:', err);
+    }
+
+    const list = getWaitlist();
+    if (!list.includes(email)) { list.push(email); saveWaitlist(list); }
+
+    input.value = '';
+    if (sentRemotely) {
+      showMeta(meta, `You're on the list. We'll email <b>${email}</b> when it's ready.`, 'success');
+    } else {
+      showMeta(meta,
+        `Saved locally. If you don't hear back, email <a href="mailto:${WAITLIST_FALLBACK_EMAIL}?subject=Waitlist%20%3A%20Everyday%20in%20PH&body=Please%20add%20me%20to%20the%20waitlist%3A%20${encodeURIComponent(email)}">${WAITLIST_FALLBACK_EMAIL}</a> directly.`,
+        'error');
+    }
+    btn.textContent = '✓ Added';
+    setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 2400);
+  });
+}
+
+/* ─── Boot ─── */
+function boot() {
+  initAllStages();
+  bindForm('hero-form', 'hero-meta');
+  bindForm('main-form', 'main-meta');
+  const loader = $('loader');
+  if (loader) {
+    setTimeout(() => {
+      loader.classList.add('gone');
+      setTimeout(() => loader.remove(), 800);
+    }, 500);
+  }
+}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+else boot();
+</script>
+</body>
+</html>
